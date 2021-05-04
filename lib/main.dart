@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wan/ui/HomePage.dart';
+import 'package:flutter_wan/ui/ProjectPage.dart';
+import 'package:flutter_wan/ui/SquarePage.dart';
+import 'package:flutter_wan/ui/SystermPage.dart';
+import 'package:flutter_wan/ui/WechartPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,6 +32,14 @@ class MainHomePage extends StatefulWidget {
 class MainScreenState extends State {
   int _currentIndex = 0;
 
+  var pages = <Widget>[
+    HomePage(),
+    ProjectPage(),
+    SquarePage(),
+    SystermPage(),
+    WechartPage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -46,9 +59,7 @@ class MainScreenState extends State {
             type: BottomNavigationBarType.fixed,
             currentIndex: _currentIndex,
           ),
-          body: Center(
-            child: Text('$_currentIndex'),
-          ),
+          body: pages[_currentIndex]
         ),
         onWillPop: null);
   }
