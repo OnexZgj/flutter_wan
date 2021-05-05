@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wan/api/apis_services.dart';
 import '../model/artical_model.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../common/common.dart';
 
 class SquarePage extends StatefulWidget {
   @override
@@ -14,7 +16,10 @@ class SquarePage extends StatefulWidget {
 
 class SquarePageState extends State<SquarePage> {
 
+  //ListView的滑动监听事件
   ScrollController _scrollController = new ScrollController();
+
+  RefreshController _refreshController = new RefreshController(initialRefresh: false);
 
 
   /// 首页文章列表数据
@@ -31,10 +36,19 @@ class SquarePageState extends State<SquarePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: itemView,
-      itemCount: _articles.length,
-      controller: _scrollController,
+    return Scaffold(
+      body: SmartRefresher(
+        enablePullUp: true,
+        enablePullDown: true,
+        onRefresh: getSquareList,
+        onLoading: getMoreSquareList,
+        controller: _refreshController,
+        child: ListView.builder(
+          itemBuilder: itemView,
+          itemCount: _articles.length,
+          controller: _scrollController,
+        ),
+      ),
     );
   }
 
@@ -50,15 +64,15 @@ class SquarePageState extends State<SquarePage> {
     super.didChangeDependencies();
     getSquareList();
     _scrollController.addListener(() {
-      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
-        //获取更多
-        getMoreSquareList();
-        debugPrint("xxxxxx");
-      }
-      if(_scrollController.position.pixels == 0){
-        _articles.clear();
-        getSquareList();
-      }
+      // if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+      //   //获取更多
+      //   getMoreSquareList();
+      //   debugPrint("xxxxxx");
+      // }
+      // if(_scrollController.position.pixels == 0){
+      //   _articles.clear();
+      //   getSquareList();
+      // }
     });
   }
 
@@ -68,9 +82,15 @@ class SquarePageState extends State<SquarePage> {
     _page++;
     debugPrint("xxxxxx: $_page");
     apiService.getSquareList((ArticleModel model){
-      setState(() {
-        _articles.addAll(model.data.datas);
-      });
+      if(model.errorCode == Constants.STATUS_SUCCESS){
+        if(model.data.datas.length>0){
+          _refreshController.loadComplete();
+          setState(() {
+            _articles.addAll(model.data.datas);
+          });
+        }
+      }
+
     }, (DioError error){
 
     }, _page);
@@ -80,9 +100,14 @@ class SquarePageState extends State<SquarePage> {
   Future getSquareList() async {
     _page = 0;
     apiService.getSquareList((ArticleModel model) {
-      setState(() {
-        _articles.addAll(model.data.datas);
-      });
+      if(model.errorCode == Constants.STATUS_SUCCESS){
+        if(model.data.datas.length>0){
+          _refreshController.refreshCompleted(resetFooterState: true);
+          setState(() {
+            _articles.addAll(model.data.datas);
+          });
+        }
+      }
     }, (DioError error) {
       debugPrint(error.message);
     }, _page);
