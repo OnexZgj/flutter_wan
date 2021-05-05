@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
 
-class LogInterceptors extends InterceptorsWrapper{
-
+class LogInterceptors extends InterceptorsWrapper {
   @override
   Future onRequest(RequestOptions options) async {
-
     print('┌─────────────────────Begin Request─────────────────────');
     printKV('uri', options.uri);
     printKV('method', options.method);
@@ -25,6 +23,25 @@ class LogInterceptors extends InterceptorsWrapper{
     return options;
   }
 
+  @override
+  onResponse(Response response) async {
+    print('┌─────────────────────Begin Response—————————————————————');
+    printKV('uri', response.request.uri);
+    printKV('status', response.statusCode);
+    printKV('responseType', response.request.responseType.toString());
+
+    StringBuffer stringBuffer = new StringBuffer();
+    response.headers.forEach((key, v) => stringBuffer.write('\n  $key: $v'));
+    printKV('headers', stringBuffer.toString());
+    stringBuffer.clear();
+
+    // printLong('response: ' + response.toString());
+
+    print('└—————————————————————End Response———————————————————————\n\n');
+
+    return response;
+  }
+
   printKV(String key, Object value) {
     printLong('$key: $value');
   }
@@ -39,9 +56,9 @@ class LogInterceptors extends InterceptorsWrapper{
         print(log.substring(0, maxLength));
         log = log.substring(maxLength);
       }
+
       /// 打印剩余部分
       print(log);
     }
   }
-
 }

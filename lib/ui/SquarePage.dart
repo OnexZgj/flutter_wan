@@ -10,7 +10,13 @@ class SquarePage extends StatefulWidget {
   }
 }
 
-class SquarePageState extends State {
+
+
+class SquarePageState extends State<SquarePage> {
+
+  ScrollController _scrollController = new ScrollController();
+
+
   /// 首页文章列表数据
   List<ArticleBean> _articles = new List();
 
@@ -28,16 +34,51 @@ class SquarePageState extends State {
     return ListView.builder(
       itemBuilder: itemView,
       itemCount: _articles.length,
+      controller: _scrollController,
     );
   }
 
   @override
   void initState() {
     super.initState();
-    getSquareList();
+
   }
 
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getSquareList();
+    _scrollController.addListener(() {
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+        //获取更多
+        getMoreSquareList();
+        debugPrint("xxxxxx");
+      }
+      if(_scrollController.position.pixels == 0){
+        _articles.clear();
+        getSquareList();
+      }
+    });
+  }
+
+
+  //获取更多数据
+  Future getMoreSquareList() async {
+    _page++;
+    debugPrint("xxxxxx: $_page");
+    apiService.getSquareList((ArticleModel model){
+      setState(() {
+        _articles.addAll(model.data.datas);
+      });
+    }, (DioError error){
+
+    }, _page);
+  }
+
+
   Future getSquareList() async {
+    _page = 0;
     apiService.getSquareList((ArticleModel model) {
       setState(() {
         _articles.addAll(model.data.datas);
