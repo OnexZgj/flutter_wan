@@ -12,15 +12,14 @@ class SquarePage extends StatefulWidget {
   }
 }
 
-
-
 class SquarePageState extends State<SquarePage> {
-
   //ListView的滑动监听事件
   ScrollController _scrollController = new ScrollController();
 
-  RefreshController _refreshController = new RefreshController(initialRefresh: false);
+  RefreshController _refreshController =
+      new RefreshController(initialRefresh: false);
 
+  bool _isLoadingWidgetShow = true;
 
   /// 首页文章列表数据
   List<ArticleBean> _articles = new List();
@@ -37,17 +36,82 @@ class SquarePageState extends State<SquarePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SmartRefresher(
-        enablePullUp: true,
-        enablePullDown: true,
-        onRefresh: getSquareList,
-        onLoading: getMoreSquareList,
-        controller: _refreshController,
-        child: ListView.builder(
-          itemBuilder: itemView,
-          itemCount: _articles.length,
-          controller: _scrollController,
+      body: Container(
+        child: Stack(
+          children: [
+            SmartRefresher(
+              enablePullUp: true,
+              enablePullDown: true,
+              onRefresh: getSquareList,
+              onLoading: getMoreSquareList,
+              controller: _refreshController,
+              child: ListView.builder(
+                itemBuilder: itemView,
+                itemCount: _articles.length,
+                controller: _scrollController,
+              ),
+            ),
+            _attachLoading(),
+            _attachNetworkError(),
+          ],
         ),
+      ),
+    );
+  }
+
+  //正在加载组件...
+  Widget _attachLoading() {
+    return Offstage(
+      offstage: !_isLoadingWidgetShow,
+      child: attachLoadingWidget(),
+    );
+  }
+
+  bool _isNetworkError = false;
+
+  Widget _attachNetworkError() {
+    return Offstage(
+      offstage: !_isNetworkError,
+      child: attachNetWorkError(),
+    );
+  }
+
+  String _errorContentMsg = "网络请求失败，请检查您的网络";
+
+  Widget attachNetWorkError() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image(
+              image: AssetImage("assets/images/ic_error.png"),
+              width: 120,
+              height: 120,
+            ),
+            Container(
+              padding: EdgeInsets.all(10),
+              child: Text(_errorContentMsg),
+            ),
+            Container(
+              padding: EdgeInsets.all(8.0),
+              child: OutlinedButton(
+                child: Text('重新加载...'),
+                onPressed: () => {getSquareList()},
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget attachLoadingWidget() {
+    return Center(
+      child: CircularProgressIndicator(
+        strokeWidth: 2.0,
+        backgroundColor: Colors.deepPurple,
       ),
     );
   }
@@ -55,9 +119,7 @@ class SquarePageState extends State<SquarePage> {
   @override
   void initState() {
     super.initState();
-
   }
-
 
   @override
   void didChangeDependencies() {
@@ -76,40 +138,44 @@ class SquarePageState extends State<SquarePage> {
     });
   }
 
-
   //获取更多数据
   Future getMoreSquareList() async {
     _page++;
     debugPrint("xxxxxx: $_page");
-    apiService.getSquareList((ArticleModel model){
-      if(model.errorCode == Constants.STATUS_SUCCESS){
-        if(model.data.datas.length>0){
+    apiService.getSquareList((ArticleModel model) {
+      if (model.errorCode == Constants.STATUS_SUCCESS) {
+        if (model.data.datas.length > 0) {
           _refreshController.loadComplete();
           setState(() {
             _articles.addAll(model.data.datas);
           });
         }
       }
-
-    }, (DioError error){
-
+    }, (DioError error) {
+      setState(() {
+        _isNetworkError = true;
+      });
     }, _page);
   }
-
 
   Future getSquareList() async {
     _page = 0;
     apiService.getSquareList((ArticleModel model) {
-      if(model.errorCode == Constants.STATUS_SUCCESS){
-        if(model.data.datas.length>0){
+      if (model.errorCode == Constants.STATUS_SUCCESS) {
+        if (model.data.datas.length > 0) {
           _refreshController.refreshCompleted(resetFooterState: true);
           setState(() {
+            _isLoadingWidgetShow = false;
+            _isNetworkError = false;
             _articles.addAll(model.data.datas);
           });
         }
       }
     }, (DioError error) {
       debugPrint(error.message);
+      setState(() {
+        _isNetworkError = true;
+      });
     }, _page);
   }
 }
@@ -146,14 +212,18 @@ class ItemArticalState extends State<ItemArticalList> {
           padding: EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            children: [Text(item.title, style: TextStyle(color: Colors.deepPurple))],
+            children: [
+              Text(item.title, style: TextStyle(color: Colors.deepPurple))
+            ],
           ),
         ),
         Container(
           padding: EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            children: [Text(item.niceDate, style: TextStyle(color: Colors.deepPurple))],
+            children: [
+              Text(item.niceDate, style: TextStyle(color: Colors.deepPurple))
+            ],
           ),
         ),
         Divider(height: 2)

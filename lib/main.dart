@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -42,6 +43,7 @@ class MainScreenState extends State {
 
   @override
   Widget build(BuildContext context) {
+    //去掉debug图标
     return WillPopScope(
         child: Scaffold(
           appBar: AppBar(title: Text('wanandroid')),
