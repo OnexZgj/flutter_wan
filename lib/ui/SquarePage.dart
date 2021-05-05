@@ -42,6 +42,7 @@ class SquarePageState extends State<SquarePage> {
             SmartRefresher(
               enablePullUp: true,
               enablePullDown: true,
+              header: WaterDropMaterialHeader(),
               onRefresh: getSquareList,
               onLoading: getMoreSquareList,
               controller: _refreshController,
