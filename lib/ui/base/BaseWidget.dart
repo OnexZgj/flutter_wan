@@ -142,7 +142,7 @@ abstract class BaseWeidgetState<T extends BaseWidget> extends State<T> {
     );
   }
 
-  showLoading() async {
+  Future showLoading() async {
     setState(() {
       _isShowNetworkError = false;
       _isShowContent = false;
@@ -151,7 +151,7 @@ abstract class BaseWeidgetState<T extends BaseWidget> extends State<T> {
     });
   }
 
-  showContent() async {
+  Future showContent() async {
     setState(() {
       _isShowNetworkError = false;
       _isShowContent = true;
@@ -160,7 +160,7 @@ abstract class BaseWeidgetState<T extends BaseWidget> extends State<T> {
     });
   }
 
-  showEmpty() async {
+  Future showEmpty() async {
     setState(() {
       _isShowNetworkError = false;
       _isShowContent = false;
