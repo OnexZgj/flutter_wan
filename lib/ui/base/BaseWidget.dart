@@ -22,6 +22,8 @@ abstract class BaseWeidgetState<T extends BaseWidget> extends State<T> {
   String _errorContentMsg = "网络请求失败，请检查您的网络";
   String _errorImgPath = "assets/images/ic_error.png";
 
+  T get auth_widget => widget; //注意复写widget的get方法
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

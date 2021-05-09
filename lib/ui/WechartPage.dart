@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_wan/api/apis_services.dart';
 import 'package:flutter_wan/common/common.dart';
 import 'package:flutter_wan/model/wx_chapter_model.dart';
-import 'package:flutter_wan/ui/SquarePage.dart';
 import 'package:flutter_wan/ui/base/BaseWidget.dart';
+
+import 'WechartPageItem.dart';
 
 class WechartPage extends BaseWidget {
   @override
@@ -15,6 +16,7 @@ class WechartPage extends BaseWidget {
 
 class WechartPageState extends BaseWeidgetState<WechartPage>
     with TickerProviderStateMixin {
+  //请求重绘的时候
   List<WxChaptersBean> _chaptersList = new List();
 
   TabController _tabController;
@@ -44,20 +46,17 @@ class WechartPageState extends BaseWeidgetState<WechartPage>
                   return Tab(text: item.name);
                 }).toList()),
           ),
-          // Expanded(child: TabBarView(children: _chaptersList.map((WxChaptersBean item) => return WxArticlePage(item.id)).toList()));
           Expanded(
               child: TabBarView(
                 controller: _tabController,
                   children: _chaptersList.map((WxChaptersBean item) {
-            return SquarePage();
+            return WxArticalPageItem(item.id);
           }).toList())),
         ],
       ),
     );
   }
 
-  @override
-  void onClickErrorWidget() {}
 
   Future getWxChaptersList() async {
     apiService.getWXChaptersList((WxChapterModel wxChapterModel) {
@@ -71,5 +70,10 @@ class WechartPageState extends BaseWeidgetState<WechartPage>
         }
       }
     }, (DioError e) {});
+  }
+
+  @override
+  void onClickErrorWidget() {
+    getWxChaptersList();
   }
 }

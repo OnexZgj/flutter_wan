@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_wan/api/apis.dart';
 import 'package:flutter_wan/model/artical_model.dart';
+import 'package:flutter_wan/model/wx_artical_item.dart';
 import 'package:flutter_wan/net/dio_manager.dart';
 import 'package:flutter_wan/model/wx_chapter_model.dart';
 
@@ -23,6 +24,17 @@ class ApiService {
   void getWXChaptersList(Function callback, Function errorCallback) async {
     dio.get(Apis.WX_CHAPTERS_LIST).then((response) {
       callback(WxChapterModel.fromJson(response.data));
+    }).catchError((e) {
+      errorCallback(e);
+    });
+  }
+
+
+  /// 获取公众号文章列表数据
+  void getWxArticalList(
+      Function callback, Function errorCallback, int _id, int _page) async {
+    dio.get(Apis.WX_ARTICLE_LIST + "/$_id/$_page/json").then((response) {
+      callback(WxArticalItemModel.fromJson(response.data));
     }).catchError((e) {
       errorCallback(e);
     });

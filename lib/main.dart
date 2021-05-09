@@ -35,10 +35,10 @@ class MainScreenState extends State {
 
   var pages = <Widget>[
     HomePage(),
-    ProjectPage(),
     SquarePage(),
-    SystermPage(),
     WechartPage(),
+    SystermPage(),
+    ProjectPage(),
   ];
 
   @override
