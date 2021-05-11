@@ -210,11 +210,12 @@ class ItemArticalState extends State<ItemArticalList> {
           ),
         ),
         Container(
+          alignment: Alignment.centerLeft,
           padding: EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+          child: Wrap(
+            alignment: WrapAlignment.start,
             children: [
-              Text(item.title, style: TextStyle(color: Colors.deepPurple))
+              Text(item.title, style: TextStyle(color: Colors.cyan)),
             ],
           ),
         ),
