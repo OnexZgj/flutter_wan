@@ -1,4 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_wan/api/apis_services.dart';
+import 'package:flutter_wan/common/common.dart';
+import 'package:flutter_wan/model/project_tree_model.dart';
 import 'package:flutter_wan/ui/base/BaseWidget.dart';
 
 class ProjectPage extends BaseWidget {
@@ -8,32 +12,44 @@ class ProjectPage extends BaseWidget {
   }
 }
 
-class ProjectPageState extends BaseWeidgetState {
+class ProjectPageState extends BaseWeidgetState with TickerProviderStateMixin {
   @override
   void initState() {}
 
   @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    showLoading().then((value) => getProjectTreeList());
+  }
+
+  TabController _tabController;
+
+  @override
   attachContentWeidget(BuildContext context) {
-    return Center(
-      child: Column(
+    _tabController =
+    new TabController(length: _projectTreeList.length, vsync: this);
+    return Scaffold(
+      body: Column(
         children: [
-          Text('我是项目'),
-          OutlinedButton(onPressed: () => {
-            showLoading()
-          }, child: Text("loading")),
-
-          OutlinedButton(onPressed: () => {
-            showContent()
-          }, child: Text("content")),
-
-          OutlinedButton(onPressed: () => {
-            showNetworkError()
-          }, child: Text("networkError")),
-
-          OutlinedButton(onPressed: () => {
-            showEmpty()
-          }, child: Text("empty")),
-
+          Container(
+            height: 50,
+            child: TabBar(
+                controller: _tabController,
+                labelColor: Colors.cyan,
+                isScrollable: true,
+                tabs: _projectTreeList.map((item) {
+                  return Tab(text :item.name);
+                }).toList()
+            ),
+          ),
+          Expanded(
+              child: TabBarView(
+                  controller: _tabController,
+                  children: _projectTreeList.map((item) {
+                    // return ProjectArticleItem(item.id);
+                    return ProjectArticleItem();
+                  }).toList()))
         ],
       ),
     );
@@ -41,8 +57,55 @@ class ProjectPageState extends BaseWeidgetState {
 
   @override
   void onClickErrorWidget() {
-    showLoading();
+    getProjectTreeList();
+  }
+
+  List<ProjectTreeBean> _projectTreeList = new List();
+
+  Future getProjectTreeList() async {
+    apiService.getProjectTreeList((ProjectTreeModel projectTreeModel) {
+      if (projectTreeModel.errorCode == Constants.STATUS_SUCCESS) {
+        if (projectTreeModel.data.length > 0) {
+          showContent();
+          setState(() {
+            _projectTreeList.clear();
+            _projectTreeList = projectTreeModel.data;
+          });
+        } else {
+          showEmpty();
+        }
+      }
+    }, (DioError error) {
+      showNetworkError();
+    });
+  }
+}
+
+
+class ProjectArticleItem extends StatefulWidget {
+
+
+
+  @override
+  State<StatefulWidget> createState() {
+    return new ProjectArticleItemState();
   }
 
 
 }
+
+
+class ProjectArticleItemState extends State<ProjectArticleItem> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SizedBox(
+          child: Text("我定"),
+        ),
+      ),
+    );
+  }
+}
+
+
